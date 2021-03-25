@@ -1,0 +1,29 @@
+{
+  "name" : "oauth",
+  "variableSets" : {
+    "default" : { }
+  },
+  "variableXpaths" : {
+    "/adapter/channel-list/channel[unique-id=\"OAuth\"]/workflow-list/standard-workflow[unique-id=\"generic\"]/service-collection/services/add-metadata-service[unique-id=\"prepare-oauth-request\"]/metadata-element[1]/value" : "${salesforceClientId}",
+    "/adapter/channel-list/channel[unique-id=\"OAuth\"]/workflow-list/standard-workflow[unique-id=\"generic\"]/service-collection/services/add-metadata-service[unique-id=\"prepare-oauth-request\"]/metadata-element[2]/value" : "${salesforceClientSecret}",
+    "/adapter/channel-list/channel[unique-id=\"OAuth\"]/workflow-list/standard-workflow[unique-id=\"generic\"]/service-collection/services/add-metadata-service[unique-id=\"prepare-oauth-request\"]/metadata-element[4]/value" : "${salesforceUsername}",
+    "/adapter/channel-list/channel[unique-id=\"OAuth\"]/workflow-list/standard-workflow[unique-id=\"generic\"]/service-collection/services/add-metadata-service[unique-id=\"prepare-oauth-request\"]/metadata-element[5]/value" : "${salesforceFullPassword}",
+    "/adapter/channel-list/channel[unique-id=\"OAuth\"]/workflow-list/standard-workflow[unique-id=\"Salesforce\"]/service-collection/services/get-and-cache-oauth-token[unique-id=\"salesforce-oauth\"]/access-token-builder/username" : "${salesforceUsername}",
+    "/adapter/channel-list/channel[unique-id=\"OAuth\"]/workflow-list/standard-workflow[unique-id=\"Salesforce\"]/service-collection/services/get-and-cache-oauth-token[unique-id=\"salesforce-oauth\"]/access-token-builder/password" : "${salesforceFullPassword}",
+    "/adapter/channel-list/channel[unique-id=\"OAuth\"]/workflow-list/standard-workflow[unique-id=\"Salesforce\"]/service-collection/services/get-and-cache-oauth-token[unique-id=\"salesforce-oauth\"]/access-token-builder/consumer-key" : "${salesforceClientId}",
+    "/adapter/channel-list/channel[unique-id=\"OAuth\"]/workflow-list/standard-workflow[unique-id=\"Salesforce\"]/service-collection/services/get-and-cache-oauth-token[unique-id=\"salesforce-oauth\"]/access-token-builder/consumer-secret" : "${salesforceClientSecret}",
+    "/adapter/channel-list/channel[unique-id=\"OAuth\"]/workflow-list/standard-workflow[unique-id=\"Gcloud\"]/service-collection/services/get-and-cache-oauth-token[unique-id=\"gcloud-oauth\"]/access-token-builder/credentials/json-key-file" : "${gcloudKeyFile}",
+    "/adapter/channel-list/channel[unique-id=\"OAuth\"]/workflow-list/standard-workflow[unique-id=\"Gcloud\"]/service-collection/services/add-metadata-service[unique-id=\"add-metadata\"]/metadata-element[1]/value" : "${gcloudProjectId}",
+    "/adapter/channel-list/channel[unique-id=\"OAuth\"]/workflow-list/standard-workflow[unique-id=\"Azure\"]/service-collection/services/get-and-cache-oauth-token[unique-id=\"azure-oauth\"]/access-token-builder/client-id" : "${azureClientId}",
+    "/adapter/channel-list/channel[unique-id=\"OAuth\"]/workflow-list/standard-workflow[unique-id=\"Azure\"]/service-collection/services/get-and-cache-oauth-token[unique-id=\"azure-oauth\"]/access-token-builder/client-secret" : "${azureClientSecret}",
+    "/adapter/channel-list/channel[unique-id=\"OAuth\"]/workflow-list/standard-workflow[unique-id=\"Azure\"]/service-collection/services/get-and-cache-oauth-token[unique-id=\"azure-oauth\"]/access-token-builder/authority-url" : "${azureAuthorityUrl}"
+  },
+  "uidInXincludeCompntListFileName" : false,
+  "xincludeXpaths" : { },
+  "additionalFiles" : {
+    "bootstrap.properties" : "bootstrap.properties",
+    "log4j2.xml" : "log4j2.xml"
+  },
+  "optionalComponentsInUse" : [ "com.adaptris:interlok-oauth-azure:4.0-SNAPSHOT", "com.adaptris:interlok-oauth-gcloud:4.0-SNAPSHOT", "com.adaptris:interlok-oauth-generic:4.0-SNAPSHOT", "com.adaptris:interlok-oauth-salesforce:4.0-SNAPSHOT" ],
+  "structured" : true
+}

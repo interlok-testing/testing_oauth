@@ -1,0 +1,459 @@
+<adapter>
+  <unique-id>oauth</unique-id>
+  <start-up-event-imp>com.adaptris.core.event.StandardAdapterStartUpEvent</start-up-event-imp>
+  <heartbeat-event-imp>com.adaptris.core.HeartbeatEvent</heartbeat-event-imp>
+  <shared-components>
+    <connections>
+      <jetty-embedded-connection>
+        <unique-id>jetty-embedded-connection</unique-id>
+      </jetty-embedded-connection>
+    </connections>
+    <services/>
+  </shared-components>
+  <event-handler class="default-event-handler">
+    <unique-id>default-event-handler</unique-id>
+    <connection class="null-connection">
+      <unique-id>null-connection</unique-id>
+    </connection>
+    <producer class="null-message-producer">
+      <unique-id>null-message-producer</unique-id>
+    </producer>
+  </event-handler>
+  <message-error-handler class="null-processing-exception-handler">
+    <unique-id>prickly-wiles</unique-id>
+  </message-error-handler>
+  <failed-message-retrier class="no-retries">
+    <unique-id>gigantic-blackwell</unique-id>
+  </failed-message-retrier>
+  <channel-list>
+    <channel>
+      <consume-connection class="shared-connection">
+        <lookup-name>jetty-embedded-connection</lookup-name>
+      </consume-connection>
+      <produce-connection class="null-connection">
+        <unique-id>angry-stonebraker</unique-id>
+      </produce-connection>
+      <workflow-list>
+        <standard-workflow>
+          <consumer class="jetty-message-consumer">
+            <unique-id>/api/salesforce</unique-id>
+            <path>/api/salesforce/*</path>
+            <parameter-handler class="jetty-http-parameters-as-metadata"/>
+            <header-handler class="jetty-http-headers-as-metadata"/>
+          </consumer>
+          <service-collection class="service-list">
+            <unique-id>tiny-beaver</unique-id>
+            <services>
+              <get-and-cache-oauth-token>
+                <unique-id>salesforce-oauth</unique-id>
+                <access-token-writer class="oauth-access-token-to-metadata">
+                  <token-key>Authorization</token-key>
+                </access-token-writer>
+                <access-token-builder class="salesforce-access-token">
+                  <username>${salesforceUsername}</username>
+                  <password>${salesforceFullPassword}</password>
+                  <consumer-key>${salesforceClientId}</consumer-key>
+                  <consumer-secret>${salesforceClientSecret}</consumer-secret>
+                </access-token-builder>
+                <cache-key>salesforceOauthToken</cache-key>
+                <connection class="cache-connection">
+                  <unique-id>nostalgic-booth</unique-id>
+                  <cache-instance class="expiring-map-cache">
+                    <expiration>
+                      <unit>HOURS</unit>
+                      <interval>1</interval>
+                    </expiration>
+                    <expiration-policy>ACCESSED</expiration-policy>
+                    <event-listener/>
+                  </cache-instance>
+                </connection>
+              </get-and-cache-oauth-token>
+              <service-list>
+                <unique-id>List Account</unique-id>
+                <services>
+                  <standalone-requestor>
+                    <unique-id>List Account</unique-id>
+                    <continue-on-fail>true</continue-on-fail>
+                    <connection class="null-connection">
+                      <unique-id>null-connection</unique-id>
+                    </connection>
+                    <producer class="standard-http-producer">
+                      <unique-id>standard-http-producer</unique-id>
+                      <method-provider class="http-configured-request-method">
+                        <method>GET</method>
+                      </method-provider>
+                      <content-type-provider class="http-configured-content-type-provider">
+                        <mime-type>application/json</mime-type>
+                      </content-type-provider>
+                      <response-header-handler class="http-response-headers-as-metadata"/>
+                      <request-header-provider class="http-metadata-request-headers">
+                        <filter class="regex-metadata-filter">
+                          <include-pattern>^Authorization.*</include-pattern>
+                        </filter>
+                      </request-header-provider>
+                      <url>https://playful-bear-338085-dev-ed.my.salesforce.com/services/data/v51.0/query?q=SELECT%20Id%2C%20Name%2C%20AccountNumber%2C%20CreatedDate%20FROM%20Account%20ORDER%20BY%20Id%20LIMIT%205</url>
+                      <authenticator class="http-no-authentication"/>
+                    </producer>
+                    <reply-timeout>
+                      <unit>SECONDS</unit>
+                      <interval>60</interval>
+                    </reply-timeout>
+                  </standalone-requestor>
+                </services>
+              </service-list>
+            </services>
+          </service-collection>
+          <producer class="jetty-standard-response-producer">
+            <unique-id>jetty-response-producer</unique-id>
+            <status-provider class="http-configured-status">
+              <status>OK_200</status>
+            </status-provider>
+            <response-header-provider class="jetty-no-response-headers"/>
+            <content-type-provider class="http-configured-content-type-provider">
+              <mime-type>application/json</mime-type>
+            </content-type-provider>
+          </producer>
+          <produce-exception-handler class="null-produce-exception-handler"/>
+          <unique-id>Salesforce</unique-id>
+          <message-metrics-interceptor>
+            <unique-id>Salesforce-MessageMetrics</unique-id>
+            <timeslice-duration>
+              <unit>MINUTES</unit>
+              <interval>5</interval>
+            </timeslice-duration>
+            <timeslice-history-count>12</timeslice-history-count>
+          </message-metrics-interceptor>
+          <in-flight-workflow-interceptor>
+            <unique-id>Salesforce-InFlight</unique-id>
+          </in-flight-workflow-interceptor>
+        </standard-workflow>
+        <standard-workflow>
+          <consumer class="jetty-message-consumer">
+            <unique-id>/api/salesforce</unique-id>
+            <path>/api/generic/*</path>
+            <parameter-handler class="jetty-http-parameters-as-metadata"/>
+            <header-handler class="jetty-http-headers-as-metadata"/>
+          </consumer>
+          <service-collection class="service-list">
+            <unique-id>tiny-beaver</unique-id>
+            <services>
+              <add-metadata-service>
+                <unique-id>prepare-oauth-request</unique-id>
+                <metadata-element>
+                  <key>client_id</key>
+                  <value>${salesforceClientId}</value>
+                </metadata-element>
+                <metadata-element>
+                  <key>client_secret</key>
+                  <value>${salesforceClientSecret}</value>
+                </metadata-element>
+                <metadata-element>
+                  <key>grant_type</key>
+                  <value>password</value>
+                </metadata-element>
+                <metadata-element>
+                  <key>username</key>
+                  <value>${salesforceUsername}</value>
+                </metadata-element>
+                <metadata-element>
+                  <key>password</key>
+                  <value>${salesforceFullPassword}</value>
+                </metadata-element>
+              </add-metadata-service>
+              <get-and-cache-oauth-token>
+                <unique-id>generic-oauth</unique-id>
+                <access-token-writer class="oauth-access-token-to-metadata">
+                  <token-key>Authorization</token-key>
+                </access-token-writer>
+                <access-token-builder class="oauth-access-token-via-form">
+                  <token-url>https://login.salesforce.com/services/oauth2/token</token-url>
+                  <response-handler class="oauth-json-response">
+                    <expires-path>$.expires_in</expires-path>
+                    <token-type-path>$.token_type</token-type-path>
+                    <access-token-path>$.access_token</access-token-path>
+                    <refresh-token-path>$.refresh_token</refresh-token-path>
+                    <expiry-converter>DAYS</expiry-converter>
+                  </response-handler>
+                </access-token-builder>
+                <cache-key>genericOauthToken</cache-key>
+                <connection class="cache-connection">
+                  <unique-id>nostalgic-booth</unique-id>
+                  <cache-instance class="expiring-map-cache">
+                    <expiration>
+                      <unit>HOURS</unit>
+                      <interval>1</interval>
+                    </expiration>
+                    <expiration-policy>ACCESSED</expiration-policy>
+                    <event-listener/>
+                  </cache-instance>
+                </connection>
+              </get-and-cache-oauth-token>
+              <service-list>
+                <unique-id>List Account</unique-id>
+                <services>
+                  <standalone-requestor>
+                    <unique-id>List Account</unique-id>
+                    <continue-on-fail>true</continue-on-fail>
+                    <connection class="null-connection">
+                      <unique-id>null-connection</unique-id>
+                    </connection>
+                    <producer class="standard-http-producer">
+                      <unique-id>standard-http-producer</unique-id>
+                      <method-provider class="http-configured-request-method">
+                        <method>GET</method>
+                      </method-provider>
+                      <content-type-provider class="http-configured-content-type-provider">
+                        <mime-type>application/json</mime-type>
+                      </content-type-provider>
+                      <response-header-handler class="http-response-headers-as-metadata"/>
+                      <request-header-provider class="http-metadata-request-headers">
+                        <filter class="regex-metadata-filter">
+                          <include-pattern>^Authorization.*</include-pattern>
+                        </filter>
+                      </request-header-provider>
+                      <url>https://playful-bear-338085-dev-ed.my.salesforce.com/services/data/v51.0/query?q=SELECT%20Id%2C%20Name%2C%20AccountNumber%2C%20CreatedDate%20FROM%20Account%20ORDER%20BY%20Id%20LIMIT%205</url>
+                      <authenticator class="http-no-authentication"/>
+                    </producer>
+                    <reply-timeout>
+                      <unit>SECONDS</unit>
+                      <interval>60</interval>
+                    </reply-timeout>
+                  </standalone-requestor>
+                </services>
+              </service-list>
+            </services>
+          </service-collection>
+          <producer class="jetty-standard-response-producer">
+            <unique-id>jetty-response-producer</unique-id>
+            <status-provider class="http-configured-status">
+              <status>OK_200</status>
+            </status-provider>
+            <response-header-provider class="jetty-no-response-headers"/>
+            <content-type-provider class="http-configured-content-type-provider">
+              <mime-type>application/json</mime-type>
+            </content-type-provider>
+          </producer>
+          <produce-exception-handler class="null-produce-exception-handler"/>
+          <unique-id>generic</unique-id>
+          <message-metrics-interceptor>
+            <unique-id>generic-MessageMetrics</unique-id>
+            <timeslice-duration>
+              <unit>MINUTES</unit>
+              <interval>5</interval>
+            </timeslice-duration>
+            <timeslice-history-count>12</timeslice-history-count>
+          </message-metrics-interceptor>
+          <in-flight-workflow-interceptor>
+            <unique-id>generic-InFlight</unique-id>
+          </in-flight-workflow-interceptor>
+        </standard-workflow>
+        <standard-workflow>
+          <consumer class="jetty-message-consumer">
+            <unique-id>/api/gcloud</unique-id>
+            <path>/api/gcloud/*</path>
+            <parameter-handler class="jetty-http-parameters-as-metadata"/>
+            <header-handler class="jetty-http-headers-as-metadata"/>
+          </consumer>
+          <service-collection class="service-list">
+            <unique-id>tiny-beaver</unique-id>
+            <services>
+              <get-and-cache-oauth-token>
+                <unique-id>gcloud-oauth</unique-id>
+                <access-token-writer class="oauth-access-token-to-metadata">
+                  <token-key>Authorization</token-key>
+                </access-token-writer>
+                <access-token-builder class="google-cloud-access-token-builder">
+                  <credentials class="key-file-credentials">
+                    <scope>https://www.googleapis.com/auth/cloud-platform</scope>
+                    <json-key-file>${gcloudKeyFile}</json-key-file>
+                  </credentials>
+                </access-token-builder>
+                <cache-key>gcloudOauthToken</cache-key>
+                <connection class="cache-connection">
+                  <unique-id>nostalgic-booth</unique-id>
+                  <cache-instance class="expiring-map-cache">
+                    <expiration>
+                      <unit>HOURS</unit>
+                      <interval>1</interval>
+                    </expiration>
+                    <expiration-policy>ACCESSED</expiration-policy>
+                    <event-listener/>
+                  </cache-instance>
+                </connection>
+              </get-and-cache-oauth-token>
+              <add-metadata-service>
+                <unique-id>add-metadata</unique-id>
+                <metadata-element>
+                  <key>projectId</key>
+                  <value>${gcloudProjectId}</value>
+                </metadata-element>
+              </add-metadata-service>
+              <service-list>
+                <unique-id>Get Project</unique-id>
+                <services>
+                  <standalone-requestor>
+                    <unique-id>Get Project</unique-id>
+                    <continue-on-fail>true</continue-on-fail>
+                    <connection class="null-connection">
+                      <unique-id>null-connection</unique-id>
+                    </connection>
+                    <producer class="standard-http-producer">
+                      <unique-id>standard-http-producer</unique-id>
+                      <method-provider class="http-configured-request-method">
+                        <method>GET</method>
+                      </method-provider>
+                      <content-type-provider class="http-configured-content-type-provider">
+                        <mime-type>application/json</mime-type>
+                      </content-type-provider>
+                      <response-header-handler class="http-response-headers-as-metadata"/>
+                      <request-header-provider class="http-metadata-request-headers">
+                        <filter class="regex-metadata-filter">
+                          <include-pattern>^Authorization.*</include-pattern>
+                        </filter>
+                      </request-header-provider>
+                      <url>https://cloudresourcemanager.googleapis.com/v1/projects/%message{projectId}</url>
+                      <authenticator class="http-no-authentication"/>
+                    </producer>
+                    <reply-timeout>
+                      <unit>SECONDS</unit>
+                      <interval>60</interval>
+                    </reply-timeout>
+                  </standalone-requestor>
+                </services>
+              </service-list>
+            </services>
+          </service-collection>
+          <producer class="jetty-standard-response-producer">
+            <unique-id>jetty-response-producer</unique-id>
+            <status-provider class="http-configured-status">
+              <status>OK_200</status>
+            </status-provider>
+            <response-header-provider class="jetty-no-response-headers"/>
+            <content-type-provider class="http-configured-content-type-provider">
+              <mime-type>application/json</mime-type>
+            </content-type-provider>
+          </producer>
+          <produce-exception-handler class="null-produce-exception-handler"/>
+          <unique-id>Gcloud</unique-id>
+          <message-metrics-interceptor>
+            <unique-id>Gcloud-MessageMetrics</unique-id>
+            <timeslice-duration>
+              <unit>MINUTES</unit>
+              <interval>5</interval>
+            </timeslice-duration>
+            <timeslice-history-count>12</timeslice-history-count>
+          </message-metrics-interceptor>
+          <in-flight-workflow-interceptor>
+            <unique-id>Gcloud-InFlight</unique-id>
+          </in-flight-workflow-interceptor>
+        </standard-workflow>
+        <standard-workflow>
+          <consumer class="jetty-message-consumer">
+            <unique-id>/api/azure</unique-id>
+            <path>/api/azure/*</path>
+            <parameter-handler class="jetty-http-parameters-as-metadata"/>
+            <header-handler class="jetty-http-headers-as-metadata"/>
+          </consumer>
+          <service-collection class="service-list">
+            <unique-id>tiny-beaver</unique-id>
+            <services>
+              <get-and-cache-oauth-token>
+                <unique-id>azure-oauth</unique-id>
+                <access-token-writer class="oauth-access-token-to-metadata">
+                  <token-key>Authorization</token-key>
+                </access-token-writer>
+                <access-token-builder class="azure-client-secret-access-token">
+                  <client-id>${azureClientId}</client-id>
+                  <resource>https://graph.microsoft.com</resource>
+                  <authority-url>${azureAuthorityUrl}</authority-url>
+                  <client-secret>${azureClientSecret}</client-secret>
+                </access-token-builder>
+                <cache-key>azureOauthToken</cache-key>
+                <connection class="cache-connection">
+                  <unique-id>nostalgic-booth</unique-id>
+                  <cache-instance class="expiring-map-cache">
+                    <expiration>
+                      <unit>HOURS</unit>
+                      <interval>1</interval>
+                    </expiration>
+                    <expiration-policy>ACCESSED</expiration-policy>
+                    <event-listener/>
+                  </cache-instance>
+                </connection>
+              </get-and-cache-oauth-token>
+              <service-list>
+                <unique-id>List Account</unique-id>
+                <services>
+                  <add-metadata-service>
+                    <unique-id>add-accept-metadata</unique-id>
+                    <metadata-element>
+                      <key>Accept</key>
+                      <value>application/json</value>
+                    </metadata-element>
+                  </add-metadata-service>
+                  <standalone-requestor>
+                    <unique-id>List Account</unique-id>
+                    <continue-on-fail>true</continue-on-fail>
+                    <connection class="null-connection">
+                      <unique-id>null-connection</unique-id>
+                    </connection>
+                    <producer class="standard-http-producer">
+                      <unique-id>standard-http-producer</unique-id>
+                      <method-provider class="http-configured-request-method">
+                        <method>GET</method>
+                      </method-provider>
+                      <content-type-provider class="http-configured-content-type-provider">
+                        <mime-type>application/json</mime-type>
+                      </content-type-provider>
+                      <response-header-handler class="http-response-headers-as-metadata"/>
+                      <request-header-provider class="http-metadata-request-headers">
+                        <filter class="regex-metadata-filter">
+                          <include-pattern>^Authorization.*</include-pattern>
+                          <include-pattern>^Accept.*</include-pattern>
+                        </filter>
+                      </request-header-provider>
+                      <url>https://graph.microsoft.com/v1.0/users</url>
+                      <authenticator class="http-no-authentication"/>
+                    </producer>
+                    <reply-timeout>
+                      <unit>SECONDS</unit>
+                      <interval>60</interval>
+                    </reply-timeout>
+                  </standalone-requestor>
+                </services>
+              </service-list>
+            </services>
+          </service-collection>
+          <producer class="jetty-standard-response-producer">
+            <unique-id>jetty-response-producer</unique-id>
+            <status-provider class="http-configured-status">
+              <status>OK_200</status>
+            </status-provider>
+            <response-header-provider class="jetty-no-response-headers"/>
+            <content-type-provider class="http-configured-content-type-provider">
+              <mime-type>application/json</mime-type>
+            </content-type-provider>
+          </producer>
+          <produce-exception-handler class="null-produce-exception-handler"/>
+          <unique-id>Azure</unique-id>
+          <message-metrics-interceptor>
+            <unique-id>Salesforce-MessageMetrics</unique-id>
+            <timeslice-duration>
+              <unit>MINUTES</unit>
+              <interval>5</interval>
+            </timeslice-duration>
+            <timeslice-history-count>12</timeslice-history-count>
+          </message-metrics-interceptor>
+          <in-flight-workflow-interceptor>
+            <unique-id>Salesforce-InFlight</unique-id>
+          </in-flight-workflow-interceptor>
+        </standard-workflow>
+      </workflow-list>
+      <unique-id>OAuth</unique-id>
+    </channel>
+  </channel-list>
+  <message-error-digester class="standard-message-error-digester">
+    <unique-id>error-digester</unique-id>
+    <digest-max-size>100</digest-max-size>
+  </message-error-digester>
+</adapter>
