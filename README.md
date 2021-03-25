@@ -1,4 +1,4 @@
-# Mail OAuth
+# OAuth Testing 
 
 Project tests interlok-oauth features
 
