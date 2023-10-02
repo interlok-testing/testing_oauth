@@ -113,7 +113,6 @@
               <mime-type>application/json</mime-type>
             </content-type-provider>
           </producer>
-          <produce-exception-handler class="null-produce-exception-handler"/>
           <unique-id>Salesforce</unique-id>
           <message-metrics-interceptor>
             <unique-id>Salesforce-MessageMetrics</unique-id>
@@ -233,7 +232,6 @@
               <mime-type>application/json</mime-type>
             </content-type-provider>
           </producer>
-          <produce-exception-handler class="null-produce-exception-handler"/>
           <unique-id>generic</unique-id>
           <message-metrics-interceptor>
             <unique-id>generic-MessageMetrics</unique-id>
@@ -333,7 +331,6 @@
               <mime-type>application/json</mime-type>
             </content-type-provider>
           </producer>
-          <produce-exception-handler class="null-produce-exception-handler"/>
           <unique-id>Gcloud</unique-id>
           <message-metrics-interceptor>
             <unique-id>Gcloud-MessageMetrics</unique-id>
@@ -434,7 +431,6 @@
               <mime-type>application/json</mime-type>
             </content-type-provider>
           </producer>
-          <produce-exception-handler class="null-produce-exception-handler"/>
           <unique-id>Azure</unique-id>
           <message-metrics-interceptor>
             <unique-id>Salesforce-MessageMetrics</unique-id>
