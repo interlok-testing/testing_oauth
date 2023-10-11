@@ -24,6 +24,6 @@
     "bootstrap.properties" : "bootstrap.properties",
     "log4j2.xml" : "log4j2.xml"
   },
-  "optionalComponentsInUse" : [ "com.adaptris:interlok-oauth-azure:4.0-SNAPSHOT", "com.adaptris:interlok-oauth-gcloud:4.0-SNAPSHOT", "com.adaptris:interlok-oauth-generic:4.0-SNAPSHOT", "com.adaptris:interlok-oauth-salesforce:4.0-SNAPSHOT" ],
+  "optionalComponentsInUse" : [ "com.adaptris:interlok-oauth-azure:5.0-SNAPSHOT", "com.adaptris:interlok-oauth-gcloud:5.0-SNAPSHOT", "com.adaptris:interlok-oauth-generic:5.0-SNAPSHOT", "com.adaptris:interlok-oauth-salesforce:5.0-SNAPSHOT" ],
   "structured" : true
 }
